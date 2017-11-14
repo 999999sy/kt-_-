@@ -1,0 +1,115 @@
+@charset "utf-8";
+@import url(http://cdn.jsdelivr.net/font-nanum/1.0/nanumbarungothic/nanumbarungothic.css);
+
+
+body,th,tr,td,p,div,li,ul,a {
+  font-family: Nanum Barun Gothic,"나눔고딕", NanumGothic, Malgun Gothic, "돋움", Dotum, AppleGothic, sans-serif !important;
+}
+
+body{
+  width:100%;
+  height:100%;
+}
+
+
+/*    header   */
+/*    headerArea    */
+/*    nav  */
+header{
+  width:100%;
+  height:110px;
+}
+.headerArea{
+  position: relative;
+  margin:auto;
+  width:1000px;
+  height:110px;
+  line-height: 110px;
+  background-color: red;
+}
+.headerArea>h2{
+  margin-top:40px;
+  display:block;
+  float: left;
+
+}
+
+.headerArea .gnb nav ul li {
+  display:block;
+  padding: 0 10px;
+  margin-left: 50px;
+  float:left;
+}
+.headerArea .gnb nav ul li a{
+  padding-bottom:30px;
+    line-height: 22px;
+    color:#999;
+    font-size: 16px;
+}
+
+ .headerArea input{
+   margin-top:40px;
+  float:right;
+  width:inherit;
+  height:25px;
+}
+.searchArea form input:after{
+  content:'';
+  clear: both;
+  display: block;
+  height:0;
+}
+
+/*     drop nav    */
+.dropNav{
+  display:none;
+  width:100%;
+  height:380px;
+}
+
+
+
+/*section*/
+
+/*article*/
+/*      main slider    */
+.mainslider{
+  position: relative;
+  width:100%;
+  height:550px;
+  background-color: blue;
+}
+
+.mainSliderView{
+  width:100%;
+  overflow: hidden;
+  height:inherit;
+}
+.mainSliderWrap{
+  width:100000px;
+  height:inherit;
+}
+.mainSliderWrap ul li{
+  width:inherit;
+  height:inherit;
+  float:left;
+}
+.mainSliderWrap ul li a{
+  float:left;
+}
+.mainSliderWrap ul li a img{
+  float:left;
+}
+
+
+
+/*article*/
+/*article*/
+/*article*/
+/*article*/
+/*article*/
+/*article*/
+/*article*/
+
+
+/*   footer  */

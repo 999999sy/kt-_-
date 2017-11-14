@@ -1,0 +1,368 @@
+/**
+	Enter키 입력시 fnName Function 수행
+	fnName : Enter Key 입력시 수행할 Function Name : String Type
+**/
+function fnCheckEnterKey(e, fnName){
+	if(event.keyCode == 13) setTimeout(fnName,0);
+	else return;
+}
+
+function getParameterByName(name) {
+	name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
+	var regex = new RegExp("[\\?&]" + name + "=([^&#]*)");
+	if(window.top.frames.length == 0){
+		// 프레임 안이 아닌 직접 경로 접근시
+		results = regex.exec(window.top.frames.location.search);
+	} else {
+		// 프레임 안에서 작동할 시
+		results = regex.exec(window.top.frames[0].location.search);
+	}
+	
+	return results === null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
+}
+
+function getUrlPath(){
+	if(window.top.frames.length == 0){
+		return window.top.frames.location.pathname;
+	} else{
+		return window.top.frames[0].location.pathname;
+	}
+}
+
+/**
+	Form 공백 check
+	frm : 공백 값을 체크 할 Form : document.form Type
+	noCheckTypes : 체크하지 않을 form의 Type 값 : String[] Type
+	noCheckNames : 체크하지 않을 form의 Name 값 : String[] Type
+**/
+function fnFormCheck(frm, noCheckTypes, noCheckNames){
+	var isChkType = true;
+	var isChkName = true;
+	for(var i =0; i<frm.elements.length; i++){
+		isChkType = true;		
+		if(noCheckTypes != null){ for(var j=0; j<noCheckTypes.length; j++){ if(frm.elements[i].type == noCheckTypes[j]) isChkType = false;}}
+		
+		isChkName = true;
+		if(noCheckNames != null){ for(var j=0; j<noCheckNames.length; j++){ if(frm.elements[i].name == noCheckNames[j]) isChkName = false;}}
+
+		if(frm.elements[i].type.toLowerCase() != "hidden" && isChkType && isChkName) {
+			if(frm.elements[i].value.trim()==""){
+				alert(frm.elements[i].title.trim());
+				frm.elements[i].focus();
+				return false;
+			}else if(frm.elements[i].value.trim().indexOf("'") > -1){
+				frm.elements[i].value = frm.elements[i].value.trim().replaceAll("'","`");
+			}
+			
+			if(frm.elements[i].type == "file" && !fnFileExtCheck(frm.elements[i])){
+				alert("Upload 할 수 없는 파일입니다.\n파일명 및 확장자를 확인해 주세요.");
+				return false;
+			}
+		}
+	}
+	return true;
+}
+
+function fnIsValidEmail(el) { //이메일 형식 판별
+	var pattern = /^[_a-zA-Z0-9-\.]+@[\.a-zA-Z0-9-]+\.[a-zA-Z]+$/;
+	return (pattern.test(el)) ? true : false;
+}
+function fnOnlyNumber() { //번호키만 입력 가능
+	if((event.keyCode<48)||(event.keyCode>57)){
+		return event.returnValue=false;
+	}
+}
+function fnNoNumber(){
+	if((event.keyCode>=48)&&(event.keyCode<=57)){
+		return event.returnValue=false;
+	}
+}
+
+
+function frmChk(frm){
+	var returnObject = new Object();
+	var checkObject = new Object();	
+	var checkboxNames = new Array();
+	var radioObject = new Object();	
+	var radioboxNames = new Array();
+	//var multiObjects = new Object();
+	
+	for(var i = 0; i < frm.elements.length; i++){
+		var name = frm.elements[i].name.trim();
+		var value = frm.elements[i].value.trim();
+		var type = frm.elements[i].type.toLowerCase();
+		
+		if(type == "select-one" || type == "text" || type == "textarea" || type == "password" || type == "hidden"){
+			if(value == ""){
+				if($(frm.elements[i]).attr("inVdt") != "true"){
+					alert(frm.elements[i].title.trim());
+//					alert(frm.elements[i].name + " : " + $(frm.elements[i]).attr("class"));
+					frm.elements[i].focus();
+					return false;
+				}
+			}else{
+				if($(frm.elements[i]).attr("inVdt") != "true" && !isEmpty($(frm.elements[i]).attr("txtGuide")) && value == $(frm.elements[i]).attr("txtGuide").trim()){
+					alert(frm.elements[i].title.trim());
+//					alert(frm.elements[i].name + " : " + frm.elements[i].title.trim());
+					frm.elements[i].focus();
+					return false;
+				}
+				
+				if(name != "" && value != ""){
+					if($(frm.elements[i]).attr("noEty") != "true") {
+						if($(frm.elements[i]).attr("isDateType") == "true") value = stringToDate(value, "-");
+						var cNames = name.split(".");
+						var childObject = new Object();
+//						var childArray = new Array();
+						
+						if(name.split(".").length == 2){
+							if(returnObject[cNames[0]] != null) childObject = returnObject[cNames[0]];
+							
+							childObject[cNames[1]] = value;
+							value = childObject;
+
+							/*
+							if(childObject.length == undefined){
+								if(childObject[cNames[1]] != null){
+									childArray.push(childObject);
+									childObject = new Object();
+									childObject[cNames[1]] = value;
+									childArray.push(childObject);
+									value = childArray;
+								}else{
+									childObject[cNames[1]] = value;
+									value = childObject;
+								}
+							}
+
+							if(childObject.length != undefined){
+								childArray = childObject;
+								for(var j=0; j<childArray.length; j++){
+									childObject = childArray[j];
+									if(childObject[cNames[1]] != null){
+										continue;
+									}else{
+										childObject[cNames[1]] = value;
+										value = childArray;
+										break;
+									}
+								}
+							}
+							*/
+							
+						}
+						name = cNames[0];
+						returnObject[name] = value;		
+					}
+				}
+			}
+		}else{
+			/** checkbox , radio, multi-select Type **/
+			if(name != "" && value != ""){
+				if(type == "radio"){
+					var radioArr = new Array();					
+					if(radioObject.hasOwnProperty(name)){
+						radioArr = radioObject[name]; 
+						radioArr.push(frm.elements[i]);
+						radioObject[name] =  radioArr;
+					}else{					
+						radioboxNames.push(name);
+						radioArr.push(frm.elements[i]);
+						radioObject[name] =  radioArr;					
+					}
+				}else if(type == "checkbox"){
+					var checkArr = new Array();					
+					if(checkObject.hasOwnProperty(name)){
+						checkArr = checkObject[name]; 
+						checkArr.push(frm.elements[i]);
+						checkObject[name] =  checkArr;
+					}else{					
+						checkboxNames.push(name);
+						checkArr.push(frm.elements[i]);
+						checkObject[name] =  checkArr;					
+					}
+				}
+				//if(multiObjects[name] == null) multiObjects[name] = $("*[name='"+name+"']");
+			}
+		}
+	}
+	
+	for(var i =0; i<radioboxNames.length; i++){
+		var radioboxs = radioObject[radioboxNames[i]];
+		var isCheckTrue = false;
+		var checkedValue = "";
+		for(var j=0; j<radioboxs.length; j++){
+			if($(radioboxs[j]).attr("checked")) {
+				isCheckTrue = true;
+				checkedValue = $(radioboxs[j]).val();
+			}
+		}
+		if(!isCheckTrue){
+			if($(radioboxs[0]).attr("inVdt") != "true"){
+				alert(radioboxs[0].title.trim());
+				radioboxs[0].focus();
+				return false;
+			}
+		}else{
+			if($(radioboxs[0]).attr("noEty") != "true") returnObject[radioboxNames[i]] = checkedValue;
+		}
+	}
+	
+	for(var i =0; i<checkboxNames.length; i++){
+		var checkboxs = checkObject[checkboxNames[i]];
+		var isCheckTrue = false;
+		var checkedValue = "";
+		var checkedEtcAttrName = "";
+		var checkedEtcAttrValue = "";		
+		for(var j=0; j<checkboxs.length; j++){
+			if($(checkboxs[j]).attr("checked")) {
+				isCheckTrue = true;
+				checkedValue += $(checkboxs[j]).val()+",";
+				if($(checkboxs[j]).attr("etcAttrName") != null && $(checkboxs[j]).attr("etcAttrName") != ""){
+					checkedEtcAttrName += $(checkboxs[j]).attr("etcAttrName")+"|";
+					checkedEtcAttrValue += $(checkboxs[j]).attr("etcAttrValue")+"|";
+				}
+			}
+		}
+		if(!isCheckTrue){
+			if($(checkboxs[0]).attr("inVdt") != "true"){
+				alert(checkboxs[0].title.trim());
+				checkboxs[0].focus();
+				return false;
+			}
+		}else{			
+			if(checkedValue!="") checkedValue = checkedValue.substring(0, checkedValue.length-1);
+			if(checkedEtcAttrName != ""){
+				checkedEtcAttrName = checkedEtcAttrName.substring(0, checkedEtcAttrName.length-1);
+				checkedEtcAttrValue = checkedEtcAttrValue.substring(0, checkedEtcAttrValue.length-1);						
+			}
+			
+			if(checkboxs.length == 1){
+				if($(checkboxs[0]).attr("noEty") != "true") returnObject[checkboxNames[i]] = checkedValue;
+				continue;
+			}
+			
+			if(checkboxNames[i].indexOf(".")>0){
+				var parentAttrName = checkboxNames[i].split(".")[0];
+				var childrenAttrName = checkboxNames[i].split(".")[1];
+				var checkValueList = [];
+				var checkValueArr = checkedValue.split(",");
+				var checkEtcNameArr = checkedEtcAttrName.split("|");
+				var checkEtcValueArr = checkedEtcAttrValue.split("|");
+				for(var j=0; j<checkValueArr.length; j++){
+					var children = {};
+					children[childrenAttrName] = checkValueArr[j];
+					if(checkedEtcAttrName!=""){
+						var etcNames = checkEtcNameArr[j].split(",");
+						var etcValues = checkEtcValueArr[j].split(",");
+						for(var k=0; k<etcNames.length; k++){
+							children[etcNames[k]] = etcValues[k];
+						}						
+					}
+					checkValueList.push(children);
+				}
+				if($(checkboxs[0]).attr("noEty") != "true") returnObject[parentAttrName] = checkValueList;
+			}else{
+				if($(checkboxs[0]).attr("noEty") != "true") returnObject[checkboxNames[i]] = checkedValue;
+			}
+		}
+	}
+	/*
+	for(var prop in multiObjects){		
+		var multiObject = multiObjects[prop];
+		var multiValues = new Array();
+		for(var i=0; i<multiObject.length; i++){
+			if($(multiObject[i]).is(":checked")){
+				multiValues.push($(multiObject[i]).val());
+			}
+		}
+		if(multiValues.length == 0){
+			if($(multiObject[0]).attr("inVdt") != "true"){
+				alert($(multiObject[0]).attr("title") != null ? $(multiObject[0]).attr("title").trim() : "");
+//				alert($(multiObject[0]).attr("title").name + " : " + ($(multiObject[0]).attr("title") != null ? $(multiObject[0]).attr("title").trim() : ""));
+				$(multiObject[0]).focus();
+				return false;
+			}
+		}else{
+			if($(frm.elements[i]).attr("noEty") != "true") returnObject[prop] = multiValues;
+		}
+	}
+	*/
+	return returnObject;
+}
+
+function isEmpty(val){
+	if(typeof(val) == "string"){
+		return val == null || val == undefined || val.trim() == "" || val.trim() == "null";
+	}else{
+		return val == null || val == undefined;
+	}
+}
+
+function isValidEmail(email){ //이메일 형식 판별
+	var pattern = /^([\w-]+(?:\.[\w-]+)*)@((?:[\w-]+\.)*\w[\w-]{0,66})\.([a-z]{2,6}(?:\.[a-z]{2})?)$/i;
+	return (pattern.test(email)) ? true : false;
+}
+
+function getParam(){
+	var url = decodeURIComponent(location.href);
+	var chkParams = url.indexOf("?");
+	var params = "";
+	var param = new Object();
+	
+	if(chkParams > -1){
+		params = url.substring(chkParams+1, url.length);
+		params = params.split("&");
+		
+		var param = new Object();
+		
+		for(var i = 0; i < params.length; i++){
+			var key = params[i].split("=")[0];
+			var value = params[i].split("=")[1];
+			
+			param[key] = value;
+		}
+	}
+	
+	return param;
+}
+
+function getParams(){
+	var url = decodeURIComponent(location.href);
+	var chkParams = url.indexOf("?");
+	var params = "";
+	
+	if(chkParams > -1){
+		params = url.substring(chkParams+1, url.length);
+	}
+	
+	return params;
+}
+
+function objectToString(object){
+	var results = [];
+	for (var property in object) results.push(property.toString() + ' : ' + object[property]);		
+	return '{' + results.join(', ') + '}';
+}
+
+function setCookie(name, value, expiredays){
+	var todayDate= new Date();
+	todayDate.setDate(todayDate.getDate() + expiredays);
+	document.cookie = name + "=" + escape(value)+"; path=/; expires=" + todayDate.toGMTString()+"; domain="+document.location.href.match(/http[s]*:\/\/([a-zA-Z0-9\-\.]*)/)[1]+";";
+}
+	
+function getCookie(name){
+	var search = name + "=";
+	if(document.cookie.length > 0){ 
+		offset = document.cookie.indexOf(search);
+		if(offset != -1){
+			offset += search.length;
+			//end = document.cookie.length;
+			end = document.cookie.indexOf(";", offset);
+			if(end == -1){
+				end = document.cookie.length;
+			}
+			return unescape(document.cookie.substring(offset, end));
+		}
+	}
+}
